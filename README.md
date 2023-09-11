@@ -1,0 +1,1 @@
+# operator-sdk-bug-2
