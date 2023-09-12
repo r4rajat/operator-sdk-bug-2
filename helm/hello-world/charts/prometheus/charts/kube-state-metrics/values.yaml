@@ -1,4 +1,9 @@
 # Default values for kube-state-metrics.
+kube-state-metrics:
+  enabled: false
+
+enabled: false
+
 prometheusScrape: true
 image:
   registry: registry.k8s.io

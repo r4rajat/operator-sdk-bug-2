@@ -1,6 +1,10 @@
 # Default values for prometheus-pushgateway.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+prometheus-pushgateway:
+  enabled: false
+
+enabled: false
 
 # Provide a name in place of prometheus-pushgateway for `app:` labels
 nameOverride: ""

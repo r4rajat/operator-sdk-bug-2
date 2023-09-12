@@ -1,6 +1,11 @@
 # Default values for prometheus-node-exporter.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+prometheus-node-exporter:
+  enabled: false
+
+enabled: false
+
 image:
   registry: quay.io
   repository: prometheus/node-exporter
