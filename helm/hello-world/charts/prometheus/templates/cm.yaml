@@ -1,3 +1,4 @@
+{{- if .Values.server.enabled -}}
 {{- if (empty .Values.server.configMapOverrideName) -}}
 apiVersion: v1
 kind: ConfigMap
@@ -88,6 +89,7 @@ data:
         - source_labels: [__meta_kubernetes_pod_container_port_number]
           regex: "9093"
           action: keep
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

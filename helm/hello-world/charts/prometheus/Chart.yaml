@@ -6,23 +6,23 @@ annotations:
     - name: Upstream Project
       url: https://github.com/prometheus/prometheus
 apiVersion: v2
-appVersion: v2.47.0
+appVersion: v2.46.0
 dependencies:
 - condition: alertmanager.enabled
   name: alertmanager
-  repository: "file://./charts/alertmanager"
-  version: 1.6.*
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 0.33.*
 - condition: kube-state-metrics.enabled
   name: kube-state-metrics
-  repository: "file://./charts/kube-state-metrics"
-  version: 5.13.*
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 5.10.*
 - condition: prometheus-node-exporter.enabled
   name: prometheus-node-exporter
-  repository: "file://./charts/prometheus-node-exporter"
-  version: 4.23.*
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 4.21.*
 - condition: prometheus-pushgateway.enabled
   name: prometheus-pushgateway
-  repository: "file://./charts/prometheus-pushgateway"
+  repository: https://prometheus-community.github.io/helm-charts
   version: 2.4.*
 description: Prometheus is a monitoring system and time series database.
 home: https://prometheus.io/
@@ -30,7 +30,7 @@ icon: https://raw.githubusercontent.com/prometheus/prometheus.github.io/master/a
 keywords:
 - monitoring
 - prometheus
-kubeVersion: '>=1.19.0-0'
+kubeVersion: '>=1.16.0-0'
 maintainers:
 - email: gianrubio@gmail.com
   name: gianrubio
@@ -50,4 +50,4 @@ sources:
 - https://github.com/prometheus/node_exporter
 - https://github.com/kubernetes/kube-state-metrics
 type: application
-version: 24.4.0
+version: 23.3.0

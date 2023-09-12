@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- if and (eq  .Values.rbac.create true) (eq .Values.rbac.useClusterRole false) -}}
 {{- range (join "," $.Values.namespaces) | split "," }}
 ---
@@ -22,3 +23,4 @@ subjects:
   namespace: {{ template "kube-state-metrics.namespace" $ }}
 {{- end -}}
 {{- end -}}
+{{- end }}

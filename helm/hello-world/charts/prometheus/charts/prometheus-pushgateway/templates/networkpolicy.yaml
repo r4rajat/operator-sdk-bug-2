@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- if .Values.networkPolicy }}
 apiVersion: {{ include "prometheus-pushgateway.networkPolicy.apiVersion" . }}
 kind: NetworkPolicy
@@ -23,4 +24,5 @@ spec:
       from:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+{{- end }}
 {{- end }}

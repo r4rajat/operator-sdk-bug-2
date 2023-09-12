@@ -41,14 +41,34 @@ helm.sh/chart: {{ include "alertmanager.chart" . }}
 app.kubernetes.io/version: {{ . | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/name: {{ include "alertmanager.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Selector labels
+
+K10 NOTE:
+
+  The selector labels here (`app` and `component`) are divergent from the
+  selector labels set by the upstream chart. This is intentional since a
+  Deployment's `spec.selector` is immutable and K10 has already been shipped
+  with these values. However, we have always shipped with alertmanager disabled.
+
+  If a customer had explicitly enabled alertmanager, a change to these selector
+  labels will mean that all customers must manually delete the Deployment before
+  upgrading, which is a situation we don't want for our customers.
+
+  Instead, the `app.kubernetes.io/name` and `app.kubernetes.io/instance` labels
+  are included in the `alertmanager.labels` block above.
+
 */}}
 {{- define "alertmanager.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "alertmanager.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{/*app.kubernetes.io/name: {{ include "alertmanager.name" . }}*/}}
+{{/*app.kubernetes.io/instance: {{ .Release.Name }}*/}}
+app: prometheus
+component: alertmanager
+release: {{ .Release.Name }}
 {{- end }}
 
 {{/*
@@ -66,7 +86,13 @@ Create the name of the service account to use
 Define Ingress apiVersion
 */}}
 {{- define "alertmanager.ingress.apiVersion" -}}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion }}
 {{- printf "networking.k8s.io/v1" }}
+{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion }}
+{{- printf "networking.k8s.io/v1beta1" }}
+{{- else }}
+{{- printf "extensions/v1beta1" }}
+{{- end }}
 {{- end }}
 
 {{/*

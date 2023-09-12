@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -13,7 +14,6 @@ spec:
   selector:
     matchLabels:
       {{- include "prometheus-node-exporter.selectorLabels" . | nindent 6 }}
-  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- with .Values.updateStrategy }}
   updateStrategy:
     {{- toYaml . | nindent 4 }}
@@ -283,3 +283,4 @@ spec:
           configMap:
             name: {{ template "prometheus-node-exporter.fullname" . }}-rbac-config
         {{- end }}
+{{- end }}

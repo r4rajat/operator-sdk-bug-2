@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- if .Values.runAsStatefulSet }}
 apiVersion: apps/v1
 kind: StatefulSet
@@ -36,14 +37,21 @@ spec:
         accessModes:
           {{ toYaml .Values.persistentVolume.accessModes }}
       {{- if .Values.persistentVolume.storageClass }}
-      {{- if (eq "-" .Values.persistentVolume.storageClass) }}
+        {{- if (eq "-" .Values.persistentVolume.storageClass) }}
         storageClassName: ""
-      {{- else }}
+        {{- else }}
         storageClassName: "{{ .Values.persistentVolume.storageClass }}"
-      {{- end }}
+        {{- end }}
+      {{- else if .Values.global.persistence.storageClass }}
+        {{- if (eq "-" .Values.global.persistence.storageClass) }}
+        storageClassName: ""
+        {{- else }}
+        storageClassName: "{{ .Values.global.persistence.storageClass }}"
+        {{- end }}
       {{- end }}
         resources:
           requests:
             storage: "{{ .Values.persistentVolume.size }}"
   {{- end }}
+{{- end }}
 {{- end }}

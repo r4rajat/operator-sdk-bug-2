@@ -15,10 +15,27 @@ Create chart name and version as used by the chart label.
 
 {{/*
 Create labels for prometheus
+
+K10 NOTE:
+
+  The selector labels here (`app` and `release`) are divergent from the
+  selector labels set by the upstream chart. This is intentional since a
+  Deployment's `spec.selector` is immutable and K10 has already been shipped
+  with these values.
+
+  A change to these selector labels will mean that all customers must manually
+  delete the Prometheus Deployment before upgrading, which is a situation we don't
+  want for our customers.
+
+  Instead, the `app.kubernetes.io/name` and `app.kubernetes.io/instance` labels
+  are included in the `prometheus.common.metaLabels` block below.
+
 */}}
 {{- define "prometheus.common.matchLabels" -}}
-app.kubernetes.io/name: {{ include "prometheus.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{/*app.kubernetes.io/name: {{ include "prometheus.name" . }}*/}}
+{{/*app.kubernetes.io/instance: {{ .Release.Name }}*/}}
+app: {{ template "prometheus.name" . }}
+release: {{ .Release.Name }}
 {{- end -}}
 
 {{/*
@@ -29,18 +46,70 @@ app.kubernetes.io/version: {{ .Chart.AppVersion }}
 helm.sh/chart: {{ include "prometheus.chart" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/part-of: {{ include "prometheus.name" . }}
+app.kubernetes.io/name: {{ include "prometheus.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- with .Values.commonMetaLabels}}
 {{ toYaml . }}
 {{- end }}
 {{- end -}}
 
-{{- define "prometheus.server.labels" -}}
-{{ include "prometheus.server.matchLabels" . }}
+{{- define "prometheus.alertmanager.labels" -}}
+{{ include "prometheus.alertmanager.matchLabels" . }}
 {{ include "prometheus.common.metaLabels" . }}
 {{- end -}}
 
-{{- define "prometheus.server.matchLabels" -}}
+{{- define "prometheus.alertmanager.matchLabels" -}}
+app.kubernetes.io/component: {{ .Values.alertmanager.name }}
+{{ include "prometheus.common.matchLabels" . }}
+{{- end -}}
+
+{{- define "prometheus.nodeExporter.labels" -}}
+{{ include "prometheus.nodeExporter.matchLabels" . }}
+{{ include "prometheus.common.metaLabels" . }}
+{{- end -}}
+
+{{- define "prometheus.nodeExporter.matchLabels" -}}
+app.kubernetes.io/component: {{ .Values.nodeExporter.name }}
+{{ include "prometheus.common.matchLabels" . }}
+{{- end -}}
+
+{{- define "prometheus.pushgateway.labels" -}}
+{{ include "prometheus.pushgateway.matchLabels" . }}
+{{ include "prometheus.common.metaLabels" . }}
+{{- end -}}
+
+{{- define "prometheus.pushgateway.matchLabels" -}}
+app.kubernetes.io/component: {{ .Values.pushgateway.name }}
+{{ include "prometheus.common.matchLabels" . }}
+{{- end -}}
+
+{{- define "prometheus.server.labels" -}}
+{{ include "prometheus.server.matchLabels" . }}
+{{ include "prometheus.common.metaLabels" . }}
 app.kubernetes.io/component: {{ .Values.server.name }}
+{{- end -}}
+
+{{/*
+Selector labels
+
+K10 NOTE:
+
+  The selector label here (`component`) is divergent from the
+  selector label set by the upstream chart. This is intentional since a
+  Deployment's `spec.selector` is immutable and K10 has already been
+  shipped with this value.
+
+  A change to this selector label will mean that all customers must manually
+  delete the Prometheus Deployment before upgrading, which is a situation we don't
+  want for our customers.
+
+  Instead, the `app.kubernetes.io/component` labels is included in the
+  `prometheus.server.labels` block above.
+
+*/}}
+{{- define "prometheus.server.matchLabels" -}}
+{{/*app.kubernetes.io/component: {{ .Values.server.name }}*/}}
+component: {{ .Values.server.name | quote }}
 {{ include "prometheus.common.matchLabels" . }}
 {{- end -}}
 
@@ -74,10 +143,29 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
-Create a fully qualified alertmanager name for communicating with the user via NOTES.txt
+Create a fully qualified alertmanager name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
+
 {{- define "prometheus.alertmanager.fullname" -}}
 {{- template "alertmanager.fullname" .Subcharts.alertmanager -}}
+{{- end -}}
+
+{{/*
+Create a fully qualified node-exporter name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "prometheus.nodeExporter.fullname" -}}
+{{- if .Values.nodeExporter.fullnameOverride -}}
+{{- .Values.nodeExporter.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- printf "%s-%s" .Release.Name .Values.nodeExporter.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s-%s" .Release.Name $name .Values.nodeExporter.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -93,6 +181,23 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s" .Release.Name .Values.server.name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- printf "%s-%s-%s" .Release.Name $name .Values.server.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create a fully qualified pushgateway name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "prometheus.pushgateway.fullname" -}}
+{{- if .Values.pushgateway.fullnameOverride -}}
+{{- .Values.pushgateway.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- printf "%s-%s" .Release.Name .Values.pushgateway.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s-%s" .Release.Name $name .Values.pushgateway.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -177,6 +282,28 @@ Return if ingress supports pathType.
 {{- end -}}
 
 {{/*
+Create the name of the service account to use for the nodeExporter component
+*/}}
+{{- define "prometheus.serviceAccountName.nodeExporter" -}}
+{{- if .Values.serviceAccounts.nodeExporter.create -}}
+    {{ default (include "prometheus.nodeExporter.fullname" .) .Values.serviceAccounts.nodeExporter.name }}
+{{- else -}}
+    {{ default "default" .Values.serviceAccounts.nodeExporter.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the name of the service account to use for the pushgateway component
+*/}}
+{{- define "prometheus.serviceAccountName.pushgateway" -}}
+{{- if .Values.serviceAccounts.pushgateway.create -}}
+    {{ default (include "prometheus.pushgateway.fullname" .) .Values.serviceAccounts.pushgateway.name }}
+{{- else -}}
+    {{ default "default" .Values.serviceAccounts.pushgateway.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create the name of the service account to use for the server component
 */}}
 {{- define "prometheus.serviceAccountName.server" -}}
@@ -194,20 +321,82 @@ Define the prometheus.namespace template if set with forceNamespace or .Release.
   {{- default .Release.Namespace .Values.forceNamespace -}}
 {{- end }}
 
+{{/* ==================================================================== */}}
+{{/* ================ Kasten added code lives below here ================ */}}
+{{/* ==================================================================== */}}
+
 {{/*
-Define template prometheus.namespaces producing a list of namespaces to monitor
+  Get the ConfigMap Reload image
 */}}
-{{- define "prometheus.namespaces" -}}
-{{- $namespaces := list }}
-{{- if and .Values.rbac.create .Values.server.useExistingClusterRoleName }}
-  {{- if .Values.server.namespaces -}}
-    {{- range $ns := join "," .Values.server.namespaces | split "," }}
-      {{- $namespaces = append $namespaces (tpl $ns $) }}
+{{- define "get.cmreloadimage" }}
+  {{- (get .Values.global.images (include "prometheus.cmreloadImageName" .)) | default (include "prometheus.cmreloadImage" .)  }}
+{{- end }}
+
+{{- define "prometheus.cmreloadImage" }}
+  {{- printf "%s:%s" (include "prometheus.cmreloadImageRepo" .) (include "prometheus.cmreloadImageTag" .) }}
+{{- end -}}
+
+{{- define "prometheus.cmreloadImageRepo" -}}
+  {{- if .Values.global.airgapped.repository }}
+    {{- printf "%s/%s" .Values.global.airgapped.repository (include "prometheus.cmreloadImageName" .) }}
+  {{- else }}
+    {{- printf "%s/%s" .Values.global.image.registry (include "prometheus.cmreloadImageName" .) }}
+  {{- end }}
+{{- end -}}
+
+{{- define "prometheus.cmreloadImageName" -}}
+  {{- printf "configmap-reload" }}
+{{- end -}}
+
+{{- define "prometheus.cmreloadImageTag" -}}
+  {{- include "get.k10ImageTag" . }}
+{{- end -}}
+
+{{/*
+  Get the Prometheus image
+*/}}
+
+{{- define "get.serverimage" }}
+  {{- (get .Values.global.images (include "prometheus.prometheusImageName" .)) | default (include "prometheus.prometheusImage" .)  }}
+{{- end -}}
+
+{{- define "prometheus.prometheusImage" }}
+  {{- printf "%s:%s" (include "prometheus.prometheusImageRepo" .) (include "prometheus.prometheusImageTag" .) }}
+{{- end -}}
+
+{{- define "prometheus.prometheusImageRepo" -}}
+  {{- if .Values.global.airgapped.repository }}
+    {{- printf "%s/%s" .Values.global.airgapped.repository (include "prometheus.prometheusImageName" .) }}
+  {{- else }}
+    {{- printf "%s/%s" .Values.global.image.registry (include "prometheus.prometheusImageName" .) }}
+  {{- end }}
+{{- end -}}
+
+{{- define "prometheus.prometheusImageName" -}}
+  {{- printf "prometheus" }}
+{{- end -}}
+
+{{- define "prometheus.prometheusImageTag" -}}
+  {{- include "get.k10ImageTag" . }}
+{{- end -}}
+
+{{/*
+Create a fully qualified Prometheus server clusterrole name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "prometheus.server.clusterrolefullname" -}}
+  {{- if .Values.server.clusterRoleNameOverride -}}
+    {{- .Values.server.clusterRoleNameOverride | trunc 63 | trimSuffix "-" -}}
+  {{- else -}}
+    {{- if .Values.server.fullnameOverride -}}
+      {{- printf "%s-%s" .Release.Name .Values.server.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+    {{- else -}}
+      {{- $name := default .Chart.Name .Values.nameOverride -}}
+      {{- if contains $name .Release.Name -}}
+        {{- printf "%s-%s" .Release.Name .Values.server.name | trunc 63 | trimSuffix "-" -}}
+      {{- else -}}
+        {{- printf "%s-%s-%s" .Release.Name $name .Values.server.name | trunc 63 | trimSuffix "-" -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
-  {{- if .Values.server.releaseNamespace -}}
-    {{- $namespaces = append $namespaces (include "prometheus.namespace" .) }}
-  {{- end -}}
-{{- end -}}
-{{ mustToJson $namespaces }}
 {{- end -}}

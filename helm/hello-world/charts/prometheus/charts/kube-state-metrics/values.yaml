@@ -1,9 +1,4 @@
 # Default values for kube-state-metrics.
-kube-state-metrics:
-  enabled: false
-
-enabled: false
-
 prometheusScrape: true
 image:
   registry: registry.k8s.io
@@ -41,13 +36,6 @@ autosharding:
   enabled: false
 
 replicas: 1
-
-# Change the deployment strategy when autosharding is disabled
-# updateStrategy: Recreate
-
-# Number of old history to retain to allow rollback
-# Default Kubernetes value is set to 10
-revisionHistoryLimit: 10
 
 # List of additional cli arguments to configure kube-state-metrics
 # for example: --enable-gzip-encoding, --log-file, etc.
@@ -154,7 +142,6 @@ prometheus:
     annotations: {}
     additionalLabels: {}
     namespace: ""
-    namespaceSelector: []
     jobLabel: ""
     targetLabels: []
     podTargetLabels: []

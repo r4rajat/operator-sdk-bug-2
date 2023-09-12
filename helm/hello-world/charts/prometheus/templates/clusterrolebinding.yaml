@@ -1,10 +1,11 @@
+{{- if .Values.server.enabled -}}
 {{- if and .Values.rbac.create (empty .Values.server.namespaces) (empty .Values.server.useExistingClusterRoleName) -}}
 apiVersion: {{ template "rbac.apiVersion" . }}
 kind: ClusterRoleBinding
 metadata:
   labels:
     {{- include "prometheus.server.labels" . | nindent 4 }}
-  name: {{ include "prometheus.clusterRoleName" . }}
+  name: {{ template "prometheus.server.clusterrolefullname" . }}
 subjects:
   - kind: ServiceAccount
     name: {{ template "prometheus.serviceAccountName.server" . }}
@@ -12,5 +13,6 @@ subjects:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ include "prometheus.clusterRoleName" . }}
+  name: {{ template "prometheus.server.clusterrolefullname" . }}
+{{- end }}
 {{- end }}

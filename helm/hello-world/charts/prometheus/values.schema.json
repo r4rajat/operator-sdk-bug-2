@@ -62,9 +62,6 @@
                         "extraVolumeDirs": {
                             "type": "array"
                         },
-                        "extraVolumeMounts": {
-                            "type": "array"
-                        },
                         "image": {
                             "type": "object",
                             "properties": {
@@ -442,9 +439,6 @@
                 "readinessProbeTimeout": {
                     "type": "integer"
                 },
-                "releaseNamespace": {
-                    "type": "boolean"
-                },
                 "remoteRead": {
                     "type": "array"
                 },
@@ -459,9 +453,6 @@
                 },
                 "retention": {
                     "type": "string"
-                },
-                "revisionHistoryLimit": {
-                    "type": "integer"
                 },
                 "securityContext": {
                     "type": "object",
@@ -599,12 +590,6 @@
                         },
                         "podManagementPolicy": {
                             "type": "string"
-                        },
-                        "pvcDeleteOnStsDelete": {
-                            "type": "boolean"
-                        },
-                        "pvcDeleteOnStsScale": {
-                            "type": "boolean"
                         }
                     }
                 },
