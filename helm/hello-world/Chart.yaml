@@ -3,3 +3,7 @@ name: hello-world
 description: A Helm chart for Kubernetes
 version: 0.1.0
 appVersion: "latest"
+#dependencies:
+#  - name: prometheus
+#    version: 24.4.0
+#    repository: "file://./charts/prometheus"
