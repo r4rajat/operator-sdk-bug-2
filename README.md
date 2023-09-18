@@ -54,3 +54,23 @@ $ operator-sdk run bundle docker.io/r4rajat/hello-world-operator-bundle:v1.0.1 -
 ```bash
 $ kubectl apply -f ./config/samples/charts_v1alpha1_helloworld.yaml
 ```
+
+```bash
+$ oc get pods
+NAME                                                              READY   STATUS             RESTARTS         AGE
+570b6af36fc4e01e3a860f8f0bef662c8c5f3eea2b342c1913d16c8d2bdw4dq   0/1     Completed          0                42m
+docker-io-r4rajat-hello-world-operator-bundle-v1-0-1              1/1     Running            0                42m
+hello-world-operator-controller-manager-7f4d65b9dd-gjmlq          1/2     CrashLoopBackOff   11 (3m55s ago)   41m
+helloworld-sample-alertmanager-0                                  1/1     Running            0                39m
+helloworld-sample-hello-world-67976bff97-fk8n5                    0/1     CrashLoopBackOff   12 (2m47s ago)   39m
+helloworld-sample-kube-state-metrics-6488696777-vz6tw             1/1     Running            0                39m
+helloworld-sample-prometheus-node-exporter-4l59t                  0/1     Pending            0                39m
+helloworld-sample-prometheus-node-exporter-672cb                  0/1     Pending            0                39m
+helloworld-sample-prometheus-node-exporter-cq8cr                  0/1     Pending            0                39m
+helloworld-sample-prometheus-node-exporter-fjpkp                  0/1     Pending            0                39m
+helloworld-sample-prometheus-node-exporter-mhhs6                  0/1     Pending            0                39m
+helloworld-sample-prometheus-node-exporter-pwk8l                  0/1     Pending            0                39m
+helloworld-sample-prometheus-pushgateway-59c4d48896-rqqwp         1/1     Running            0                39m
+helloworld-sample-prometheus-server-54bc6978dd-mrsr5              2/2     Running            0                39m
+mysql-0                                                           1/1     Running            0                3h7m
+```
